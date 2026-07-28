@@ -1,11 +1,16 @@
 import Link from "next/link";
 
 const footerLinks = [
-  { href: "#galeri", label: "Galeri" },
-  { href: "#yayin", label: "Yayın" },
-  { href: "#ilanlar", label: "İlanlar" },
-  { href: "#etkinlikler", label: "Etkinlikler" },
-  { href: "#topluluk", label: "Topluluk" },
+  { href: "/galeri", label: "Galeri" },
+  { href: "/yayin", label: "Yayın" },
+  { href: "/ilanlar", label: "İlanlar" },
+  { href: "/etkinlikler", label: "Etkinlikler" },
+  { href: "/topluluk", label: "Topluluk" },
+];
+
+const authLinks = [
+  { href: "/login", label: "Giriş Yap" },
+  { href: "/register", label: "Üye Ol" },
 ];
 
 export function Footer() {
@@ -18,6 +23,16 @@ export function Footer() {
           </div>
           <nav className="flex gap-6 font-mono text-xs text-cream-dim tracking-wide">
             {footerLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="hover:text-copper transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <span className="text-hairline">|</span>
+            {authLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

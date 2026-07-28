@@ -20,13 +20,13 @@ export function Hero() {
           </p>
           <div className="flex gap-4 flex-wrap">
             <Link
-              href="#galeri"
+              href="/galeri"
               className="font-mono text-xs tracking-widest uppercase px-6 py-3.5 rounded-sm border border-copper bg-copper text-bg hover:bg-[#DE9A57] hover:border-[#DE9A57] transition-all"
             >
               Galeriyi Keşfet
             </Link>
             <Link
-              href="#ilanlar"
+              href="/ilanlar"
               className="font-mono text-xs tracking-widest uppercase px-6 py-3.5 rounded-sm border border-chrome text-cream hover:border-copper hover:text-copper transition-all"
             >
               İlanlara Bak
