@@ -4,6 +4,8 @@ import {
     Source_Serif_4,
     JetBrains_Mono,
 } from "next/font/google";
+import { Nav } from "./components/Nav";
+import { Footer } from "./components/Footer";
 import "./globals.css";
 
 const bigShoulders = Big_Shoulders({
@@ -40,7 +42,11 @@ export default function RootLayout({
             lang="tr"
             className={`${bigShoulders.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} h-full antialiased`}
         >
-        <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>
+        <body className="min-h-full flex flex-col" suppressHydrationWarning>
+          <Nav />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </body>
         </html>
     );
 }
