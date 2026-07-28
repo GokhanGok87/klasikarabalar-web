@@ -31,9 +31,6 @@ export const metadata: Metadata = {
     title: "Klasik Arabalar — Miras Devam Ediyor",
     description:
         "Restore edilmiş klasikleri keşfet, alım-satım ilanlarına göz at, buluşmalara katıl ve bu mirası yaşatan topluluğun bir parçası ol.",
-    icons: {
-        icon: "favicon.gif",
-    },
 };
 
 export default function RootLayout({
