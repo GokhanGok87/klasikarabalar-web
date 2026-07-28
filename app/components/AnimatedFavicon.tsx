@@ -13,14 +13,6 @@ export function AnimatedFavicon() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const link =
-      document.querySelector<HTMLLinkElement>('link[rel*="icon"]') ||
-      document.createElement("link");
-    link.rel = "icon";
-    if (!link.parentNode) {
-      document.head.appendChild(link);
-    }
-
     async function loadGif() {
       try {
         const response = await fetch("/favicon.gif");
@@ -35,31 +27,53 @@ export function AnimatedFavicon() {
             frame.dims.height
           );
           imageData.data.set(frame.patch);
-          frames.push({ data: imageData, delay: frame.delay });
+          // delay is in centiseconds (1/100s), convert to ms
+          // default to 100ms if delay is 0 or invalid
+          const delayMs = frame.delay > 0 ? frame.delay * 10 : 100;
+          frames.push({ data: imageData, delay: delayMs });
         }
 
-        if (frames.length > 1) {
-          const drawFrame = () => {
-            const frame = frames[currentIndex];
+        if (frames.length <= 1) {
+          // Single frame - just set static favicon
+          if (frames.length === 1) {
+            const frame = frames[0];
             canvas.width = frame.data.width;
             canvas.height = frame.data.height;
             ctx!.putImageData(frame.data, 0, 0);
-            link.href = canvas.toDataURL("image/png");
-            currentIndex = (currentIndex + 1) % frames.length;
-          };
+            updateFavicon(canvas.toDataURL("image/png"));
+          }
+          return;
+        }
 
-          drawFrame();
-          animationId = setInterval(drawFrame, frames[0].delay * 10);
-        } else if (frames.length === 1) {
-          const frame = frames[0];
+        const drawFrame = () => {
+          const frame = frames[currentIndex];
           canvas.width = frame.data.width;
           canvas.height = frame.data.height;
           ctx!.putImageData(frame.data, 0, 0);
-          link.href = canvas.toDataURL("image/png");
-        }
+          updateFavicon(canvas.toDataURL("image/png"));
+          currentIndex = (currentIndex + 1) % frames.length;
+        };
+
+        // Draw first frame immediately
+        drawFrame();
+
+        // Use the delay from the first frame, with a minimum of 50ms
+        const intervalMs = Math.max(frames[0].delay, 50);
+        animationId = setInterval(drawFrame, intervalMs);
       } catch (error) {
-        console.error("Failed to load animated favicon:", error);
+        console.error("AnimatedFavicon: Failed to load GIF:", error);
       }
+    }
+
+    function updateFavicon(href: string) {
+      let link = document.querySelector<HTMLLinkElement>('link[rel*="icon"]');
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+      // Add timestamp to force browser to refresh
+      link.href = href;
     }
 
     loadGif();
