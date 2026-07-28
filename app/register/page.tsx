@@ -1,10 +1,76 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useReveal } from "../hooks/useReveal";
+import { createClient } from "../lib/supabase/client";
 
 export default function RegisterPage() {
   const formRef = useReveal<HTMLDivElement>();
+  const router = useRouter();
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    city: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Şifreler eşleşmiyor");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Şifre en az 6 karakter olmalı");
+      return;
+    }
+
+    setLoading(true);
+
+    const supabase = createClient();
+
+    const { error: authError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {
+          username: formData.username,
+          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+          city: formData.city,
+        },
+      },
+    });
+
+    if (authError) {
+      if (authError.message.includes("already registered")) {
+        setError("Bu e-posta adresi zaten kayıtlı");
+      } else if (authError.message.includes("unique")) {
+        setError("Bu kullanıcı adı zaten alınmış");
+      } else {
+        setError("Kayıt sırasında bir hata oluştu");
+      }
+      setLoading(false);
+      return;
+    }
+
+    // Başarılı kayıt - giriş sayfasına yönlendir
+    router.push("/login?registered=true");
+  };
 
   return (
     <>
@@ -49,7 +115,15 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              <form className="space-y-5">
+              {error && (
+                <div className="mb-6 p-4 rounded-sm bg-redline/10 border border-redline/30">
+                  <p className="font-mono text-[0.72rem] text-redline text-center">
+                    {error}
+                  </p>
+                </div>
+              )}
+
+              <form onSubmit={handleRegister} className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="font-mono text-[0.7rem] tracking-widest uppercase text-chrome block mb-2">
@@ -57,8 +131,12 @@ export default function RegisterPage() {
                     </label>
                     <input
                       type="text"
+                      name="firstName"
                       placeholder="Adınız"
                       className="input-field"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
                     />
                   </div>
                   <div>
@@ -67,8 +145,12 @@ export default function RegisterPage() {
                     </label>
                     <input
                       type="text"
+                      name="lastName"
                       placeholder="Soyadınız"
                       className="input-field"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
                     />
                   </div>
                 </div>
@@ -78,8 +160,12 @@ export default function RegisterPage() {
                   </label>
                   <input
                     type="text"
+                    name="username"
                     placeholder="kullaniciadi"
                     className="input-field"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
                 <div>
@@ -88,8 +174,12 @@ export default function RegisterPage() {
                   </label>
                   <input
                     type="email"
+                    name="email"
                     placeholder="ornek@email.com"
                     className="input-field"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
                 <div>
@@ -98,8 +188,13 @@ export default function RegisterPage() {
                   </label>
                   <input
                     type="password"
+                    name="password"
                     placeholder="••••••••"
                     className="input-field"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    minLength={6}
                   />
                 </div>
                 <div>
@@ -108,15 +203,24 @@ export default function RegisterPage() {
                   </label>
                   <input
                     type="password"
+                    name="confirmPassword"
                     placeholder="••••••••"
                     className="input-field"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
                 <div>
                   <label className="font-mono text-[0.7rem] tracking-widest uppercase text-chrome block mb-2">
                     Şehir
                   </label>
-                  <select className="input-field">
+                  <select
+                    name="city"
+                    className="input-field"
+                    value={formData.city}
+                    onChange={handleChange}
+                  >
                     <option value="">Şehir seçin</option>
                     <option value="istanbul">İstanbul</option>
                     <option value="ankara">Ankara</option>
@@ -128,6 +232,7 @@ export default function RegisterPage() {
                   <input
                     type="checkbox"
                     className="w-4 h-4 mt-0.5 accent-copper bg-bg-panel border-hairline rounded-sm"
+                    required
                   />
                   <span className="font-mono text-[0.66rem] text-cream-dim leading-relaxed">
                     <Link href="#" className="text-copper hover:text-[#DE9A57]">
@@ -142,9 +247,10 @@ export default function RegisterPage() {
                 </label>
                 <button
                   type="submit"
-                  className="w-full font-mono text-xs tracking-widest uppercase px-6 py-3.5 rounded-sm border border-copper bg-copper text-bg hover:bg-[#DE9A57] hover:border-[#DE9A57] transition-all"
+                  disabled={loading}
+                  className="w-full font-mono text-xs tracking-widest uppercase px-6 py-3.5 rounded-sm border border-copper bg-copper text-bg hover:bg-[#DE9A57] hover:border-[#DE9A57] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Üye Ol
+                  {loading ? "Kayıt Yapılıyor..." : "Üye Ol"}
                 </button>
               </form>
 

@@ -1,10 +1,46 @@
 "use client";
 
 import Link from "next/link";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useReveal } from "../hooks/useReveal";
+import { createClient } from "../lib/supabase/client";
 
-export default function LoginPage() {
+function LoginForm() {
   const formRef = useReveal<HTMLDivElement>();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/";
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const supabase = createClient();
+
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      setError(authError.message === "Invalid login credentials"
+        ? "E-posta veya şifre hatalı"
+        : "Giriş sırasında bir hata oluştu"
+      );
+      setLoading(false);
+      return;
+    }
+
+    router.push(redirect);
+    router.refresh();
+  };
 
   return (
     <>
@@ -47,7 +83,15 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              <form className="space-y-5">
+              {error && (
+                <div className="mb-6 p-4 rounded-sm bg-redline/10 border border-redline/30">
+                  <p className="font-mono text-[0.72rem] text-redline text-center">
+                    {error}
+                  </p>
+                </div>
+              )}
+
+              <form onSubmit={handleLogin} className="space-y-5">
                 <div>
                   <label className="font-mono text-[0.7rem] tracking-widest uppercase text-chrome block mb-2">
                     E-posta
@@ -56,6 +100,9 @@ export default function LoginPage() {
                     type="email"
                     placeholder="ornek@email.com"
                     className="input-field"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
                 <div>
@@ -66,6 +113,9 @@ export default function LoginPage() {
                     type="password"
                     placeholder="••••••••"
                     className="input-field"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="flex items-center justify-between">
@@ -87,9 +137,10 @@ export default function LoginPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full font-mono text-xs tracking-widest uppercase px-6 py-3.5 rounded-sm border border-copper bg-copper text-bg hover:bg-[#DE9A57] hover:border-[#DE9A57] transition-all"
+                  disabled={loading}
+                  className="w-full font-mono text-xs tracking-widest uppercase px-6 py-3.5 rounded-sm border border-copper bg-copper text-bg hover:bg-[#DE9A57] hover:border-[#DE9A57] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Giriş Yap
+                  {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
                 </button>
               </form>
 
@@ -109,5 +160,17 @@ export default function LoginPage() {
         </div>
       </section>
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="font-mono text-chrome">Yükleniyor...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
