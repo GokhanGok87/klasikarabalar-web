@@ -83,7 +83,7 @@ export function Nav() {
           ) : user ? (
             <div className="flex items-center gap-4">
               <Link
-                href="/xloginpanel"
+                href="/dashboard"
                 className="flex items-center gap-2 text-cream-dim hover:text-copper transition-colors"
               >
                 <div className="w-7 h-7 rounded-full bg-copper/20 border border-copper/30 flex items-center justify-center">
