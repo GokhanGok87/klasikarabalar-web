@@ -39,7 +39,7 @@ export default function AdminLayout({
             lang="tr"
             className={`${bigShoulders.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} h-full antialiased`}
         >
-        <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <body className="min-h-full flex flex-col bg-[#14120F] text-[#ECE4D3]" suppressHydrationWarning>
           <AnimatedFavicon />
           {children}
         </body>
