@@ -4,8 +4,6 @@ import {
     Source_Serif_4,
     JetBrains_Mono,
 } from "next/font/google";
-import { Nav } from "./components/Nav";
-import { Footer } from "./components/Footer";
 import { AnimatedFavicon } from "./components/AnimatedFavicon";
 import "./globals.css";
 
@@ -45,9 +43,7 @@ export default function RootLayout({
         >
         <body className="min-h-full flex flex-col" suppressHydrationWarning>
           <AnimatedFavicon />
-          <Nav />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          {children}
         </body>
         </html>
     );

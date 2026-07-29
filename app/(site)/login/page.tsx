@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useReveal } from "../hooks/useReveal";
-import { createClient } from "../lib/supabase/client";
+import { useReveal } from "../../hooks/useReveal";
+import { createClient } from "../../lib/supabase/client";
 
 function LoginForm() {
   const formRef = useReveal<HTMLDivElement>();

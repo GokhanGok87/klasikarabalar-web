@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useReveal } from "../hooks/useReveal";
-import { createClient } from "../lib/supabase/client";
+import { useReveal } from "../../hooks/useReveal";
+import { createClient } from "../../lib/supabase/client";
 
 export default function RegisterPage() {
   const formRef = useReveal<HTMLDivElement>();
