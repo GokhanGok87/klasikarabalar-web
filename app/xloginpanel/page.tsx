@@ -23,7 +23,7 @@ export default function XLoginPanel() {
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) {
-        router.push("/login?redirect=/xloginpanel");
+        router.push("/xloginpanel/login");
         return;
       }
 

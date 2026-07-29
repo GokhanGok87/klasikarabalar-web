@@ -34,16 +34,24 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Admin paneli ve dashboard için oturum kontrolü
-  const protectedPaths = ["/xloginpanel", "/dashboard"];
-  const isProtected = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
+  // Admin paneli için oturum kontrolü (kendi login sayfası var)
+  if (request.nextUrl.pathname.startsWith("/xloginpanel")) {
+    // /xloginpanel/login sayfasına erişime izin ver
+    if (request.nextUrl.pathname === "/xloginpanel/login") {
+      return supabaseResponse;
+    }
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/xloginpanel/login";
+      return NextResponse.redirect(url);
+    }
+  }
 
-  if (isProtected && !user) {
+  // Dashboard için oturum kontrolü
+  if (request.nextUrl.pathname.startsWith("/dashboard") && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirect", request.nextUrl.pathname);
+    url.searchParams.set("redirect", "/dashboard");
     return NextResponse.redirect(url);
   }
 
