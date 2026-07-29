@@ -4,7 +4,7 @@ import {
     Source_Serif_4,
     JetBrains_Mono,
 } from "next/font/google";
-import { AnimatedFavicon } from "./components/AnimatedFavicon";
+import { AnimatedFavicon } from "./components/ui/AnimatedFavicon";
 import "./globals.css";
 
 const bigShoulders = Big_Shoulders({

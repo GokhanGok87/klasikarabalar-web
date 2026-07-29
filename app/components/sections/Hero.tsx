@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SpeedGauge } from "./SpeedGauge";
+import { SpeedGauge } from "../ui/SpeedGauge";
 
 export function Hero() {
   return (

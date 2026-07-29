@@ -1,5 +1,5 @@
-import { Nav } from "../components/Nav";
-import { Footer } from "../components/Footer";
+import { Nav } from "../components/ui/Nav";
+import { Footer } from "../components/ui/Footer";
 
 export default function SiteLayout({
     children,

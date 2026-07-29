@@ -1,9 +1,9 @@
-import { Hero } from "../components/Hero";
-import { Gallery } from "../components/Gallery";
-import { Blog } from "../components/Blog";
-import { Listings } from "../components/Listings";
-import { Events } from "../components/Events";
-import { Community } from "../components/Community";
+import { Hero } from "../components/sections/Hero";
+import { Gallery } from "../components/sections/Gallery";
+import { Blog } from "../components/sections/Blog";
+import { Listings } from "../components/sections/Listings";
+import { Events } from "../components/sections/Events";
+import { Community } from "../components/sections/Community";
 
 export default function Home() {
   return (
