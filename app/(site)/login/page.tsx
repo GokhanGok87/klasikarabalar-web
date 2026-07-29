@@ -11,6 +11,8 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
+  const confirmed = searchParams.get("confirmed");
+  const registered = searchParams.get("registered");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -91,6 +93,22 @@ function LoginForm() {
                 </div>
               )}
 
+              {confirmed && (
+                <div className="mb-6 p-4 rounded-sm bg-[#33473A]/30 border border-[#33473A]">
+                  <p className="font-mono text-[0.72rem] text-[#5A9E6F] text-center">
+                    E-posta adresiniz başarıyla doğrulandı. Giriş yapabilirsiniz.
+                  </p>
+                </div>
+              )}
+
+              {registered && (
+                <div className="mb-6 p-4 rounded-sm bg-copper/10 border border-copper/20">
+                  <p className="font-mono text-[0.72rem] text-copper text-center">
+                    Kayıt başarılı! Gelen kutunuzu kontrol edin ve e-posta adresinizi doğrulayın.
+                  </p>
+                </div>
+              )}
+
               <form onSubmit={handleLogin} className="space-y-5">
                 <div>
                   <label className="font-mono text-[0.7rem] tracking-widest uppercase text-chrome block mb-2">
@@ -129,7 +147,7 @@ function LoginForm() {
                     </span>
                   </label>
                   <Link
-                    href="#"
+                    href="/sifremi-unuttum"
                     className="font-mono text-[0.7rem] text-copper hover:text-[#DE9A57] transition-colors"
                   >
                     Şifremi unuttum
