@@ -1,100 +1,79 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "../lib/supabase/client";
+import { User } from "@supabase/supabase-js";
+
+// Admin email listesi - güvenli tarafta tanımlı
+const ADMIN_EMAILS = [
+  "admin@klasikarabalar.org",
+  "gokhangok@icloud.com",
+];
 
 export default function XLoginPanel() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoggedIn(true);
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        router.push("/login?redirect=/xloginpanel");
+        return;
+      }
+
+      // Admin kontrolü - email listede mi veya user_metadata'da role var mı
+      const isUserAdmin =
+        ADMIN_EMAILS.includes(user.email || "") ||
+        user.user_metadata?.role === "admin";
+
+      if (!isUserAdmin) {
+        // Admin değilse ana sayfaya yönlendir
+        router.push("/");
+        return;
+      }
+
+      setUser(user);
+      setIsAdmin(true);
+      setLoading(false);
+    });
+  }, [router]);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
   };
 
-  if (!isLoggedIn) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-7">
-        <div className="w-full max-w-[400px]">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full border-2 border-copper flex items-center justify-center">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#C6813F"
-                strokeWidth="1.5"
-                className="w-9 h-9"
-              >
-                <path d="M12 12c2.5 0 4.5-2 4.5-4.5S14.5 3 12 3 7.5 5 7.5 7.5 9.5 12 12 12zm0 2c-3 0-9 1.5-9 4.5V21h18v-2.5c0-3-6-4.5-9-4.5z" />
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0110 0v4" />
-              </svg>
-            </div>
-            <h1 className="font-display font-bold uppercase text-cream text-2xl tracking-wide">
-              Yönetim Paneli
-            </h1>
-            <p className="font-mono text-[0.7rem] text-chrome tracking-widest mt-2">
-              KLASİKARABALAR.ORG
-            </p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-bg">
+        <div className="font-mono text-chrome">Yükleniyor...</div>
+      </div>
+    );
+  }
 
-          {/* Login Form */}
-          <div className="bg-bg-panel border border-hairline rounded-sm p-8">
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div>
-                <label className="font-mono text-[0.7rem] tracking-widest uppercase text-chrome block mb-2">
-                  Kullanıcı Adı
-                </label>
-                <input
-                  type="text"
-                  placeholder="admin"
-                  className="input-field"
-                  defaultValue="admin"
-                />
-              </div>
-              <div>
-                <label className="font-mono text-[0.7rem] tracking-widest uppercase text-chrome block mb-2">
-                  Şifre
-                </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className="input-field"
-                  defaultValue="admin"
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 accent-copper bg-bg-panel border-hairline rounded-sm"
-                  />
-                  <span className="font-mono text-[0.7rem] text-cream-dim">
-                    Beni hatırla
-                  </span>
-                </label>
-                <span className="font-mono text-[0.7rem] text-copper cursor-pointer hover:text-[#DE9A57]">
-                  Şifremi unuttum
-                </span>
-              </div>
-              <button
-                type="submit"
-                className="w-full font-mono text-xs tracking-widest uppercase px-6 py-3.5 rounded-sm border border-copper bg-copper text-bg hover:bg-[#DE9A57] hover:border-[#DE9A57] transition-all"
-              >
-                Giriş Yap
-              </button>
-            </form>
+  if (!user || !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-bg">
+        <div className="text-center">
+          <div className="font-display font-bold uppercase text-redline text-xl mb-4">
+            Erişim Engellendi
           </div>
-
-          {/* Back to site */}
-          <div className="text-center mt-6">
-            <a
-              href="/"
-              className="font-mono text-[0.7rem] text-chrome hover:text-copper transition-colors"
-            >
-              ← Siteye Dön
-            </a>
-          </div>
+          <p className="font-mono text-[0.72rem] text-chrome mb-6">
+            Bu alana erişim yetkiniz bulunmuyor.
+          </p>
+          <a
+            href="/"
+            className="font-mono text-xs tracking-widest uppercase px-6 py-3 rounded-sm border border-copper text-copper hover:bg-copper hover:text-bg transition-all"
+          >
+            Ana Sayfaya Dön
+          </a>
         </div>
       </div>
     );
@@ -130,15 +109,20 @@ export default function XLoginPanel() {
     { id: "settings", label: "Ayarlar" },
   ];
 
+  const username = user.user_metadata?.username || user.email?.split("@")[0] || "Admin";
+
   return (
     <div className="min-h-screen bg-bg">
       {/* Header */}
       <header className="bg-bg-panel border-b border-hairline sticky top-0 z-50">
         <div className="max-w-[1400px] mx-auto px-7 flex items-center justify-between h-16">
           <div className="flex items-center gap-6">
-            <div className="font-display font-extrabold text-lg tracking-wide flex items-baseline gap-2">
+            <a
+              href="/"
+              className="font-display font-extrabold text-lg tracking-wide flex items-baseline gap-2"
+            >
               KLASİK<span className="text-copper">ARABALAR</span>
-            </div>
+            </a>
             <span className="font-mono text-[0.6rem] tracking-widest uppercase px-2.5 py-1 rounded-sm bg-copper/20 text-copper border border-copper/30">
               ADMIN
             </span>
@@ -146,14 +130,16 @@ export default function XLoginPanel() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-copper/20 border border-copper/30 flex items-center justify-center">
-                <span className="font-mono text-[0.66rem] text-copper">A</span>
+                <span className="font-mono text-[0.66rem] text-copper">
+                  {username.charAt(0).toUpperCase()}
+                </span>
               </div>
               <span className="font-mono text-xs text-cream-dim hidden sm:block">
-                Admin
+                {username}
               </span>
             </div>
             <button
-              onClick={() => setIsLoggedIn(false)}
+              onClick={handleLogout}
               className="font-mono text-[0.7rem] tracking-widest uppercase px-4 py-2 rounded-sm border border-hairline text-chrome hover:border-redline hover:text-redline transition-all"
             >
               Çıkış
@@ -427,19 +413,16 @@ export default function XLoginPanel() {
                           Şehir
                         </th>
                         <th className="text-left font-mono text-[0.66rem] tracking-widest uppercase text-chrome px-5 py-3">
-                          Araç Sayısı
-                        </th>
-                        <th className="text-left font-mono text-[0.66rem] tracking-widest uppercase text-chrome px-5 py-3">
                           Durum
                         </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-hairline">
                       {[
-                        { name: "Ahmet Yılmaz", email: "ahmet@mail.com", city: "İstanbul", cars: 3, active: true },
-                        { name: "Elif Kaya", email: "elif@mail.com", city: "Ankara", cars: 2, active: true },
-                        { name: "Mehmet Demir", email: "mehmet@mail.com", city: "İzmir", cars: 1, active: true },
-                        { name: "Ayşe Çelik", email: "ayse@mail.com", city: "İstanbul", cars: 0, active: false },
+                        { name: "Ahmet Yılmaz", email: "ahmet@mail.com", city: "İstanbul", active: true },
+                        { name: "Elif Kaya", email: "elif@mail.com", city: "Ankara", active: true },
+                        { name: "Mehmet Demir", email: "mehmet@mail.com", city: "İzmir", active: true },
+                        { name: "Ayşe Çelik", email: "ayse@mail.com", city: "İstanbul", active: false },
                       ].map((user, i) => (
                         <tr key={i} className="hover:bg-bg-panel-hi transition-colors">
                           <td className="px-5 py-3">
@@ -459,9 +442,6 @@ export default function XLoginPanel() {
                           </td>
                           <td className="px-5 py-3 font-mono text-xs text-cream-dim">
                             {user.city}
-                          </td>
-                          <td className="px-5 py-3 font-mono text-sm text-copper">
-                            {user.cars}
                           </td>
                           <td className="px-5 py-3">
                             <span
