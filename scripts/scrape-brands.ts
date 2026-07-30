@@ -7,6 +7,12 @@
  * Usage: npm run scrape (from scripts/ dir)
  */
 
+import { config } from "dotenv";
+import { resolve } from "path";
+
+// Load .env.local from project root
+config({ path: resolve(process.cwd(), ".env.local") });
+
 import * as cheerio from "cheerio";
 import { createClient } from "@supabase/supabase-js";
 
