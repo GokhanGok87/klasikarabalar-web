@@ -23,7 +23,7 @@ export function Hero() {
               href="/galeri"
               className="font-mono text-xs tracking-widest uppercase px-6 py-3.5 rounded-sm border border-copper bg-copper text-bg hover:bg-[#DE9A57] hover:border-[#DE9A57] transition-all"
             >
-              Galeriyi Keşfet
+              Galeriyi Keşfet (deneme)
             </Link>
             <Link
               href="/ilanlar"
